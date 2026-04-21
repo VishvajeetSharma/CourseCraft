@@ -5,27 +5,28 @@ import type { RootState } from '../redux/store';
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  allowedRoles?: string[];
+  allowedRoles?: string[];   // protected route — only these roles can access
+  guestOnly?: boolean;       // guest-only route — logged-in users get redirected away
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ children, allowedRoles }) => {
-  const { isAuthenticated, userType, token } = useSelector((state: RootState) => state.auth);
+const AuthGuard: React.FC<AuthGuardProps> = ({ children, allowedRoles, guestOnly }) => {
+  const { isAuthenticated, userType } = useSelector((state: RootState) => state.auth);
   const location = useLocation();
 
-  // If not authenticated, redirect to login
-  if (!isAuthenticated || !token) {
-    // If the path looks like an admin path, we could redirect to admin-login, 
-    // but the user's requirement says "redirect to /login url" generally.
-    // However, I'll stick to a smart redirect:
-    const isTryingToAccessAdmin = location.pathname.startsWith('/admin');
-    return <Navigate to={isTryingToAccessAdmin ? "/admin-login" : "/login"} state={{ from: location }} replace />;
+  // Guest-only pages (login, register) — redirect already logged-in users to their dashboard
+  if (guestOnly && isAuthenticated && userType) {
+    return <Navigate to={userType === 'admin' ? '/admin-dashboard' : '/user-dashboard'} replace />;
   }
 
-  // Role-based access control
+  // Protected pages — redirect unauthenticated users to login
+  if (allowedRoles && !isAuthenticated) {
+    const isAdminPath = location.pathname.startsWith('/admin');
+    return <Navigate to={isAdminPath ? '/admin-login' : '/login'} state={{ from: location }} replace />;
+  }
+
+  // Role mismatch — redirect to their own dashboard
   if (allowedRoles && userType && !allowedRoles.includes(userType)) {
-    // If user tries to access admin, redirect to user dashboard
-    // If admin tries to access user, redirect to admin dashboard
-    return <Navigate to={userType === 'admin' ? "/admin-dashboard" : "/user-dashboard"} replace />;
+    return <Navigate to={userType === 'admin' ? '/admin-dashboard' : '/user-dashboard'} replace />;
   }
 
   return <>{children}</>;

@@ -34,9 +34,9 @@ const App = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/registration" element={<Registration />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/registration" element={<AuthGuard guestOnly><Registration /></AuthGuard>} />
+          <Route path="/login" element={<AuthGuard guestOnly><Login /></AuthGuard>} />
+          <Route path="/admin-login" element={<AuthGuard guestOnly><AdminLogin /></AuthGuard>} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/news-and-blogs" element={<NewsBlogs />} />
           <Route path="/faq" element={<Faq />} />

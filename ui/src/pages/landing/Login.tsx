@@ -47,7 +47,7 @@ const Login = () => {
       const res = await userLoginService(data);
       if (res.success) {
         showALert("User Login", res?.message, "success")
-        dispatch(setAuth({ token: res?.result?.token, userType: "user" }));
+        dispatch(setAuth({ token: res?.result?.accessToken, userType: "user" }));
         setUser(res?.result)
         navigate('/user-dashboard');
         reset()

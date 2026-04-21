@@ -6,20 +6,25 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
-const getStoredItem = (key: string) => {
+const getStoredString = (key: string): string | null => {
   const item = localStorage.getItem(key);
   if (!item) return null;
+  // strip surrounding quotes if JSON-stringified accidentally
   try {
-    return JSON.parse(item);
+    const parsed = JSON.parse(item);
+    return typeof parsed === 'string' ? parsed : null;
   } catch {
     return item;
   }
 };
 
+const storedToken = getStoredString('token');
+const storedUserType = getStoredString('userType');
+
 const initialState: AuthState = {
-  token: getStoredItem('token'),
-  userType: getStoredItem('userType'),
-  isAuthenticated: !!getStoredItem('token'),
+  token: storedToken,
+  userType: storedUserType,
+  isAuthenticated: !!(storedToken && storedUserType),
 };
 
 const authSlice = createSlice({
